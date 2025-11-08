@@ -10,6 +10,70 @@ sessions = {}
 EXECUTION_TIMEOUT = 3.0  # seconds per code cell
 SESSION_TTL = 600        # 10 minutes idle before cleanup
 
+# OpenAI-style tool definitions
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_python_code",
+            "description": "Execute Python code in a persistent session. Each session retains its own global context.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "The Python code to execute."
+                    },
+                    "session_id": {
+                        "type": "string",
+                        "description": "Optional session ID. If not provided, a new session will be created."
+                    }
+                },
+                "required": ["code"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "reset_session",
+            "description": "Delete one session by ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "session_id": {
+                        "type": "string",
+                        "description": "The session ID to reset."
+                    }
+                },
+                "required": ["session_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_sessions",
+            "description": "List all current sessions and their last activity times.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "timeout_cleanup",
+            "description": "Delete sessions idle longer than SESSION_TTL.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    }
+]
+
 # Auto session cleanup
 @app.on_event("startup")
 async def start_cleanup_task():
@@ -76,8 +140,6 @@ async def list_sessions():
         for sid, s in sessions.items()
     ]
     return {"active_sessions": data}
-
-
 @app.post("/python_tool/timeout_cleanup")
 async def timeout_cleanup():
     """Delete sessions idle longer than SESSION_TTL."""
@@ -88,5 +150,13 @@ async def timeout_cleanup():
             del sessions[sid]
             removed.append(sid)
     return {"removed_sessions": removed, "remaining_sessions": list(sessions.keys())}
+
+
+@app.get("/functions")
+async def get_functions():
+    """Return all available functions in OpenAI tool format."""
+    return {"tools": TOOLS}
+
+
 
 

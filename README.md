@@ -32,6 +32,9 @@ curl http://localhost:8081/python_tool/list_sessions
 #### Cleanup sessions
 curl -X POST http://localhost:8081/python_tool/timeout_cleanup
 
+#### Get functions
+curl http://localhost:8081/functions
+
 ## Running without Docker
 ```bash
 git clone https://github.com/lupusmagist/python-tool.git

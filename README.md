@@ -42,12 +42,3 @@ pip install fastapi uvicorn
 uvicorn python_tool:app --host 0.0.0.0 --port 8081
 ```
 
-## Using gpt-oss with llama-server
-I have included a example tools.yaml file with the project.
-
-```bash
-llama-server \
--m gpt-oss-20b-mxfp4.gguf \
---tools tools.yaml \
---port 9999
-```
